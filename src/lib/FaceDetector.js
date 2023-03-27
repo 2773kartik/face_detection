@@ -251,7 +251,7 @@ export default class FaceDetector extends Component {
         if (newHighFaceFrames < 1) {
           newHighFaceFrames = newHighFaceFrames + 1
         } else {
-          newCanvasSizeIndex = newCanvasSizeIndex - 2
+          //newCanvasSizeIndex = newCanvasSizeIndex - 2
           newHighFaceFrames = 0
         }
       } else {
@@ -262,10 +262,10 @@ export default class FaceDetector extends Component {
           if (newNoFaceFrames < 1) {
             newNoFaceFrames = newNoFaceFrames + 1
           } else {
-            newCanvasSizeIndex = Math.min(
-              newCanvasSizeIndex + 2,
-              200
-            )
+            // newCanvasSizeIndex = Math.min(
+            //   newCanvasSizeIndex + 2,
+            //   200
+            // )
             newNoFaceFrames = 0
           }
       } else {

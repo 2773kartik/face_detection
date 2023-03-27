@@ -4,6 +4,16 @@ import FaceDetector from "./lib";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showResults, setShowResults] = useState(false)
+  const [showResults1, setShowResults1] = useState(false)
+  const change = () => {
+    setShowResults(true);
+    setShowResults1(false);
+  }
+  const change1 = () => {
+    setShowResults(false);
+    setShowResults1(true);
+  }
   return (
     <div>
       <nav className="bg-gray-800">
@@ -128,21 +138,33 @@ function App() {
         </div>
       </header>
       <main>
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {/* <!-- Replace with your content --> */}
-          <div className="px-4 py-6 sm:px-0">
-            <div className="border-4 border-dashed border-gray-200 rounded-lg h-96">
-            <FaceDetector>
-            {facesData => 
-                <ul>
-                    {facesData.map(face => <li>{face.x + ' ' + face.y}</li>)}
-                </ul>
-            }
-            </FaceDetector>
-            </div>
-          </div>
-          {/* <!-- /End replace --> */}
-        </div>
+      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  <div className="flex justify-center space-x-4">
+    <div className="border-2 border-blue-600 rounded-lg px-3 py-2 text-blue-400 cursor-pointer hover:bg-blue-600 hover:text-blue-200 w-28" onClick={change}>
+      Detect
+    </div>
+    <div className="border-2 border-blue-600 rounded-lg px-3 py-2 text-blue-400 cursor-pointer hover:bg-blue-600 hover:text-blue-200 w-28" onClick={change1}>
+      Recognize
+    </div>
+  </div>
+  <div className="px-4 py-6 sm:px-0">
+    <div className="border-4 border-dashed border-gray-200 rounded-lg h-96">
+      <center className={showResults ? "visible" : "invisible"}>
+        <FaceDetector>
+          {(facesData) => (
+            <ul>
+              {facesData.map((face) => (
+                <li key={`${face.x}-${face.y}`}>{face.x + " " + face.y}</li>
+              ))}
+            </ul>
+          )}
+        </FaceDetector>
+        <h1>Face detection using PICO</h1>
+      </center>
+    </div>
+  </div>
+</div>
+
       </main>
     </div>
   );
