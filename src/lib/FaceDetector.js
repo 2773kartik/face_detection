@@ -284,5 +284,5 @@ export default class FaceDetector extends Component {
 
 FaceDetector.defaultProps = { 
   active: true,
-  showCanvas: false 
+  showCanvas: true
 }
