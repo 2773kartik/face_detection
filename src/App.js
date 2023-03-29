@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Transition } from "@headlessui/react";
 import FaceDetector from "./lib";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import axios from 'axios';
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +16,32 @@ function App() {
     setShowResults(false);
     setShowResults1(true);
   }
+
+  const [name, setName] = useState('');
+  const [msg, setMsg] = useState('');
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  const register = () => {
+    axios.get(`http://localhost:5000/register?name=${name}`)
+      .then(res => setMsg(res.data))
+      .catch(err => console.log(err));
+  }
+
+  const login = () => {
+    axios.get('http://localhost:5000/login')
+      .then(res => {
+        setMsg(res.data);
+        if (res.data !== 'You are unknown first register your self') {
+          const ctx = canvasRef.current.getContext('2d');
+          const img = new Image();
+          img.onload = () => ctx.drawImage(img, 0, 0);
+          img.src = 'http://localhost:5000/static/Images/Unknown_faces/' + Math.random() + '.jpg';
+        }
+      })
+      .catch(err => console.log(err));
+  }
+
   return (
     <div>
       <nav className="bg-gray-800">
@@ -150,7 +178,7 @@ function App() {
   <div className="px-4 py-6 sm:px-0">
     <div className="border-4 border-dashed border-gray-200 rounded-lg h-96">
       <center className={showResults ? "visible" : "invisible"}>
-        <FaceDetector>
+        {/* <FaceDetector prop={showResults}>
           {(facesData) => (
             <ul>
               {facesData.map((face) => (
@@ -158,8 +186,22 @@ function App() {
               ))}
             </ul>
           )}
-        </FaceDetector>
+        </FaceDetector> */}
         <h1>Face detection using PICO</h1>
+      </center>
+      <center className={showResults1 ? "visible" : "invisible"}>
+      <div className="App">
+      <header className="App-header">
+        <h1>Face Recognition</h1>
+      </header>
+        <div className="form-container">
+          <label htmlFor="name">Name:</label>
+          <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} />
+          <button onClick={register}>Register</button>
+          <button onClick={login}>Login</button>
+          <h1>{msg}</h1>
+        </div>
+    </div>
       </center>
     </div>
   </div>
