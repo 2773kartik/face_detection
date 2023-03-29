@@ -24,3 +24,4 @@ yarn-error.log*
 
 server/service.json
 server/checker.py
+server/Images/*
