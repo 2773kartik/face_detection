@@ -1,23 +1,35 @@
 import face_recognition
 import cv2
+import uuid
 import numpy as np
 import os
 from flask import *
 from flask_cors import CORS
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, storage
 from firebase_admin import db
 
+p = 0
 
 app = Flask(__name__)
 CORS(app)
 cred = credentials.Certificate("service.json")
 firebase_admin.initialize_app(cred, {
+    'storageBucket': 'face-recognition-d3e7d.appspot.com',
     'databaseURL': 'https://face-recognition-d3e7d-default-rtdb.firebaseio.com'
 })
 db_ref = db.reference("register")
 known_path = os.path.join(os.getcwd(), "Images/Known_faces/")
 unknown_path = os.path.join(os.getcwd(), "Images/Unknown_faces/")
+
+def upload_image_to_storage(name, path):
+    bucket = storage.bucket()
+    blob = bucket.blob(name)
+    blob.upload_from_filename(path)
+    # Make the image URL public so that it can be accessed from anywhere
+    blob.make_public()
+    return blob.public_url
+
 def get_data():
     db = db_ref.get()
     data = []
@@ -67,10 +79,13 @@ def register():
     db_ref.child(name).set(data)
     if(data["encoding"]==""):
         register()
-    return "Done"
+    p = 0
+    return ["Done", p, 0]
 
 @app.route("/login")
 def login():
+    names = ""
+    url = ""
     db = get_data()
     if(db == []):
         msg = "You are unknown first register your self"
@@ -111,10 +126,13 @@ def login():
                 cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
                 font = cv2.FONT_HERSHEY_DUPLEX
                 cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-            os.chdir(unknown_path)
-            rand_no = np.random.random_sample()
-            cv2.imwrite(str(rand_no)+".jpg", frame)
-    return msg
+            bucket_name = "face-recognition-d3e7d.appspot.com"
+            names = str(uuid.uuid4()) + '.jpg'
+            path = os.path.join(unknown_path, names)
+            cv2.imwrite(path, frame)
+            url = upload_image_to_storage(names, path)
+    p = 1
+    return [msg, p, url]
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -18,7 +18,7 @@ function App() {
   }
 
   const [name, setName] = useState('');
-  const [msg, setMsg] = useState('');
+  const [msg, setMsg] = useState([]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -32,11 +32,11 @@ function App() {
     axios.get('http://localhost:5000/login')
       .then(res => {
         setMsg(res.data);
-        if (res.data !== 'You are unknown first register your self') {
+        if (res.data[0] !== 'You are unknown first register your self') {
           const ctx = canvasRef.current.getContext('2d');
           const img = new Image();
           img.onload = () => ctx.drawImage(img, 0, 0);
-          img.src = 'http://localhost:5000/static/Images/Unknown_faces/' + Math.random() + '.jpg';
+          img.src = 'http://localhost:5000/static/Images/Unknown_faces/' + res.data[2] + '.jpg';
         }
       })
       .catch(err => console.log(err));
@@ -176,7 +176,7 @@ function App() {
     </div>
   </div>
   <div className="px-4 py-6 sm:px-0">
-    <div className="border-4 border-dashed border-gray-200 rounded-lg h-96">
+    <div className="border-4 border-dashed border-gray-200 rounded-lg h-auto">
       <center className={showResults ? "visible" : "invisible"}>
         {/* <FaceDetector prop={showResults}>
           {(facesData) => (
@@ -199,7 +199,12 @@ function App() {
           <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} />
           <button onClick={register}>Register</button>
           <button onClick={login}>Login</button>
-          <h1>{msg}</h1>
+          <h1>{msg[0]}</h1>
+          {msg[1]==1?
+          <img src={`${msg[2]}`}></img>
+          :
+          <img></img>
+          }
         </div>
     </div>
       </center>
