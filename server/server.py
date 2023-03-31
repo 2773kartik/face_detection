@@ -56,6 +56,7 @@ def index():
 
 @app.route('/register', methods=['GET'])
 def register():
+    msg = ""
     name = request.args.get("name")
     video_capture = cv2.VideoCapture(0)
     ret, frame = video_capture.read()
@@ -77,9 +78,11 @@ def register():
     }
     db_ref.child(name).set(data)
     if(data["encoding"]==""):
-        register()
+        msg = "Face not detected, please stay still/ check lighting conditions"
+    else :
+        msg = "Done"
     p = 0
-    return ["Done", p, 0]
+    return [msg, p, 0]
 
 @app.route("/login")
 def login():
