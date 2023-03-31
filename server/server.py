@@ -19,13 +19,14 @@ firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://face-recognition-d3e7d-default-rtdb.firebaseio.com'
 })
 db_ref = db.reference("register")
-known_path = os.path.join(os.getcwd(), "Images/Known_faces/")
-unknown_path = os.path.join(os.getcwd(), "Images/Unknown_faces/")
+known_path = "Known_faces/"
+unknown_path = "Unknown_faces/"
 
-def upload_image_to_storage(name, path):
+def upload_image_to_storage(name, image):
     bucket = storage.bucket()
     blob = bucket.blob(name)
-    blob.upload_from_filename(path)
+    # the `image` parameter should be a numpy array representing the image
+    blob.upload_from_string(cv2.imencode('.jpg', image)[1].tostring(), content_type='image/jpeg')
     # Make the image URL public so that it can be accessed from anywhere
     blob.make_public()
     return blob.public_url
@@ -62,12 +63,10 @@ def register():
     rgb_small_frame = small_frame[:, :, ::-1]
     face_locations = face_recognition.face_locations(rgb_small_frame)
     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-    dir = os.path.join(known_path,name)
-    if(not os.path.isdir(dir)):
-        os.mkdir(dir)
-    os.chdir(dir) 
-    rand_no = np.random.random_sample()
-    cv2.imwrite(str(rand_no)+".jpg", frame)
+    n = "Images/Known_faces/"+name+"/"
+    nn = str(uuid.uuid4()) + '.jpg'
+    nn = n + nn
+    url = upload_image_to_storage(nn, frame)
     video_capture.release()
     cv2.destroyAllWindows()
     encoding = ""
@@ -128,9 +127,9 @@ def login():
                 cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
             bucket_name = "face-recognition-d3e7d.appspot.com"
             names = str(uuid.uuid4()) + '.jpg'
+            names = "Images/Unknown_faces/" + names
             path = os.path.join(unknown_path, names)
-            cv2.imwrite(path, frame)
-            url = upload_image_to_storage(names, path)
+            url = upload_image_to_storage(names, frame)
     p = 1
     return [msg, p, url]
 
