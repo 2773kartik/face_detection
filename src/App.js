@@ -8,13 +8,33 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [showResults, setShowResults] = useState(false)
   const [showResults1, setShowResults1] = useState(false)
+  const [stream, setStream] = useState(null);
+
+  const startCamera = () => {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(stream => {
+        setStream(stream);
+      })
+      .catch(error => {
+        console.log('Error accessing camera:', error);
+      });
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
   const change = () => {
     setShowResults(true);
     setShowResults1(false);
+    startCamera()
   }
   const change1 = () => {
     setShowResults(false);
     setShowResults1(true);
+    stopCamera()
   }
 
   const [name, setName] = useState('');
@@ -76,7 +96,7 @@ function App() {
             <div className="items-baseline space-x-4">
               <a
                 href="#"
-                className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                className="text-gray-300 bg-violet-700 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
               >
                 Reports
               </a>
@@ -177,8 +197,8 @@ function App() {
   </div>
   <div className="px-4 py-6 sm:px-0">
     <div className="border-4 border-dashed border-gray-200 rounded-lg h-auto">
-      <center className={showResults ? "visible" : "invisible"}>
-        {/* <FaceDetector prop={showResults}>
+      <center className={showResults ? "visible" : "hidden"}>
+        {stream && <FaceDetector stream={stream}>
           {(facesData) => (
             <ul>
               {facesData.map((face) => (
@@ -186,19 +206,20 @@ function App() {
               ))}
             </ul>
           )}
-        </FaceDetector> */}
+        </FaceDetector>}
         <h1>Face detection using PICO</h1>
       </center>
-      <center className={showResults1 ? "visible" : "invisible"}>
+      <center className={showResults1 ? "visible" : "hidden"}>
       <div className="App">
       <header className="App-header">
         <h1>Face Recognition</h1>
       </header>
         <div className="form-container">
           <label htmlFor="name">Name:</label>
-          <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} />
-          <button onClick={register}>Register</button>
-          <button onClick={login}>Login</button>
+          <input type="text" id="name" placeholder="Your id (keep it unique)" value={name} onChange={e => setName(e.target.value)} className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"/>
+          <br/>
+          <button onClick={register} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded">Register</button>
+          <button onClick={login} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login</button>
           <h1>{msg[0]}</h1>
           {msg[1]==1?
           <img src={`${msg[2]}`}></img>

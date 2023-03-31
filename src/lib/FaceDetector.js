@@ -27,24 +27,32 @@ export default class FaceDetector extends Component {
   }
 
   async componentDidMount() {
-    const stream = await navigator
-      .mediaDevices.getUserMedia({ video: true, audio: false })
-
-    this.video.srcObject = stream
-    this.video.play()
+    const { stream } = this.props;
+  
+    if (!stream) {
+      return;
+    }
+  
+    this.video.srcObject = stream;
+    this.video.play();
     this.ctx = this.canvas.getContext('2d', { alpha: false })
-		
+  
     pico.picoInit()
-
+  
     if (this.props.active) {
       this.newWorkQueue()
       this.detectionLoop()
     }
   }
 
-  componentDidUpdate() {
+  async componentDidUpdate(prevProps) {
     if (this.props.active && !this.workQueue.length) {
       this.newWorkQueue()
+    }
+  
+    //Check if stream prop becomes null and reset state
+    if(prevProps.stream && !this.props.stream){
+      this.setState({facesData: {}, faceScale: 1, noFaceFrames: 0, highFaceFrames: 0})
     }
   }
 
@@ -53,7 +61,7 @@ export default class FaceDetector extends Component {
     const relativeFacesData = facesData.length ? 
       facesData.map(face => this.relativeFaceLocation(face)) :
       [{x: null, y: null, size: null, strength: null}]
-
+  
     return (
       <React.Fragment>
         <canvas 
@@ -71,13 +79,13 @@ export default class FaceDetector extends Component {
 
     const taskStartTime = performance.now()
     this.carryOverData = firstTask.action(this.carryOverData)
-    this.taskTimes[firstTask.tag] = performance.now() - taskStartTime
+    this.taskTimes[firstTask?.tag] = performance.now() - taskStartTime
 
     if (!this.workQueue.length) return
 
     requestIdleCallback(deadline => {
-      if (!this.taskTimes[this.workQueue[0].tag]) this.taskTimes[this.workQueue[0].tag] = 1
-      if (this.taskTimes[this.workQueue[0].tag] < deadline.timeRemaining() * 0.9) {
+      if (!this.taskTimes[this.workQueue[0]?.tag]) this.taskTimes[this.workQueue[0]?.tag] = 1
+      if (this.taskTimes[this.workQueue[0]?.tag] < deadline.timeRemaining() * 0.9) {
         this.performPartialWork()
       }
     })
@@ -187,6 +195,10 @@ export default class FaceDetector extends Component {
   }
 
   updateCanvas = () => {
+    if (!this.video || !this.video.videoWidth) {
+      return;
+    }
+    
     const width = this.state.currentCanvasSizeIndex * 4
     const height = this.state.currentCanvasSizeIndex * 3
     this.canvas.width = Math.floor(width)
