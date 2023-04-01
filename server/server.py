@@ -11,7 +11,7 @@ from firebase_admin import db
 
 p = 0
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='build/static', template_folder='build')
 CORS(app)
 cred = credentials.Certificate("service.json")
 firebase_admin.initialize_app(cred, {
@@ -52,7 +52,11 @@ def get_data():
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template('index.html')
+
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory(app.static_folder, path)
 
 @app.route('/register', methods=['GET'])
 def register():
